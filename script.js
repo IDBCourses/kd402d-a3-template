@@ -1,24 +1,27 @@
 /*
- * IDB Programming: A1 Modelling — a musical instrument
+ * IDB Programming: A3 — a musical instrument
  *
  * All of the code for your instrument goes in this file. It's split into sections:
  *   settings — the "fixed" parts of your program
  *   state    — the parts of your program that change over time
  *   sound    — the Tone.js instruments and effects
  *   update   — updates the state every 100ms, if necessary
- *   use      — applies the state to make sound every 100ms, if necessary
+ *   use      — uses the state to make sound and shapes every 100ms, if necessary
  *   controls — what happens when a key goes down or comes up
  *   setup    — starts everything
  *
- * There is no loop in this assignment. Nothing happens until the player presses
- * a key, and every key event follows the same two steps:
- *   1. update: change the state, based on which key it was
- *   2. use:    make sound from the state
+ * The key events only change the state. update() and use() each run every
+ * 100ms, in a loop:
+ *   1. update: change the state, e.g. based on time or on which keys are down
+ *   2. use:    make sound and move shapes, based on the state
+ *
+ * Shapes come from shape.js: createShape() makes one, and its methods
+ * (setPosition, setSize, setColour ...) change it.
  *
  * Tone.js documentation: https://tonejs.github.io/docs/15.1.22/
  */
 
-import * as Util from "./shape.js";
+import { createShape } from "./shape.js";
 
 // ---------- Settings ----------
 // Settings variables should contain all of the "fixed" parts of your programs
@@ -35,13 +38,11 @@ const synth = new Tone.PolySynth(Tone.Synth).toDestination(); // can play severa
 // ---------- Update ----------
 // Update the state. This is called every 100ms.
 function update() {
-  // Example: replace this with your own instrument.
-
   setTimeout(update, 100); // call update() again in 100 milliseconds
 }
 
 // ---------- Use ----------
-// Use the state to make sound. This is called every 100ms.
+// Use the state to make sound and move shapes. This is called every 100ms.
 function use() {
   setTimeout(use, 100); // call use() again in 100 milliseconds
 }
@@ -68,7 +69,9 @@ function setup() {
   update(); // start the update loop
   use(); // start the use loop
 
-  let s = Util.createShape("test");
+  // Example: a shape near the middle of the window. Replace it with your own.
+  const example = createShape("example");
+  example.setPosition(0.5, 0.5);
 
   // Put your event listener code here
   window.addEventListener("keydown", keyDown);
