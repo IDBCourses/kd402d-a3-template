@@ -8,13 +8,12 @@
 
 ## How to play
 
-<!-- What does the pointer do? How does moving it fast, slow, in circles, or not at all change the sound and the shapes? -->
+<!-- Fill in the table with a row for everything the player can do with the pointer: clicking, moving slowly or fast, moving in circles, holding still... Say what happens to the sound and to the shapes. If you added keys, give them rows too. -->
 
-<!-- If you added keys, fill in the table and add a row for every key or group of keys. Delete the table if you didn't. -->
-
-| Key | What it does |
-| --- | ------------ |
-|     |              |
+| When you...  | The sound...                         | The shapes... |
+| ------------ | ------------------------------------ | ------------- |
+| Click or tap | Plays a C4 (the example: replace it) | Nothing yet   |
+|              |                                      |               |
 
 <!-- Anything else a player needs to know: how to get started, a good thing to try first. -->
 
