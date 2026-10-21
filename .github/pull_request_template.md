@@ -10,4 +10,4 @@
 
 ## Anything you're unsure about
 
-<!-- Anything that doesn't work yet, or that your groupmates should know about. Write "Nothing" if there's nothing. -->
+<!-- Anything that doesn't work yet, or that you want to come back to. Write "Nothing" if there's nothing. -->
