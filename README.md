@@ -64,16 +64,16 @@ Having your code on GitHub doesn't count as handing it in. Upload it on Canvas t
 
 - A `PolySynth` connected to the speakers, ready to play.
 - `update()` and `use()`, which each run every 100 milliseconds. Change the state in `update()`, and use it to make sound and move shapes in `use()`.
-- `keyDown()` and `keyUp()` handlers that log keys to the console. They start Tone.js on the first key press, because browsers only allow sound after the player has done something.
+- A `note` constant in the settings, and a `pointerDown()` handler that plays it every time you click, tap or touch the page. It also starts Tone.js, because browsers only allow sound after the player has done something.
 - One example shape near the middle of the window. Replace it with your own.
 
-There's no pointer code yet: adding it is the assignment. Remember that the pointer also needs to start Tone.js (`Tone.start()`), just like the keys do.
+Playing a note on `pointerdown` is only a starting point. Making the pointer's movement over time shape the sound and the shapes is the assignment.
 
 ### Run it
 
 1. Open `index.html`, then run **Live Preview: Show Preview (External Browser)** from the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
 2. Open the browser's developer tools (`F12`, or `Cmd+Option+I` on a Mac) and click the **Console** tab.
-3. You should see a pink circle in the middle of the page. Click on the page, then press `A`. You should see `Key down: a` and `Key up: a` in the console.
+3. You should see a pink circle in the middle of the page. Click anywhere on the page. You should hear a note, and see `Pointer down at` and the pointer's position in the console.
 
 ### The live page
 
