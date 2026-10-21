@@ -18,11 +18,11 @@
  * Tone.js documentation: https://tonejs.github.io/docs/15.1.22/
  */
 
+import * as Util from "./shape.js";
+
 // ---------- Settings ----------
 // Settings variables should contain all of the "fixed" parts of your programs
 // For example: which key does what, which notes you can play, the tempo.
-const exampleKey = "a"; // the key that plays the example note
-const exampleNote = "C4"; // the note it plays
 
 // ---------- State ----------
 // State variables are the parts of your program that change over time.
@@ -54,22 +54,12 @@ function keyDown(event) {
   // Holding a key down sends keydown again and again. Only react to the first one.
   if (event.repeat === false) {
     console.log("Key down:", event.key);
-
-    // Example: replace this with your own instrument.
-    if (event.key === exampleKey) {
-      synth.triggerAttack(exampleNote, Tone.now()); // keeps sounding until triggerRelease
-    }
   }
 }
 
 // Runs every time a key comes up.
 function keyUp(event) {
   console.log("Key up:", event.key);
-
-  // Example: replace this with your own instrument.
-  if (event.key === exampleKey) {
-    synth.triggerRelease(exampleNote, Tone.now());
-  }
 }
 
 // ---------- Setup ----------
@@ -77,6 +67,8 @@ function keyUp(event) {
 function setup() {
   update(); // start the update loop
   use(); // start the use loop
+
+  let s = Util.createShape("test");
 
   // Put your event listener code here
   window.addEventListener("keydown", keyDown);
