@@ -1,164 +1,120 @@
 /**
- * The default DOM element used by the utilities when no element is provided.
- * This selects the element with id "thing0" if present.
- * @type {HTMLElement|null}
+ * Return an id not used by any other element, appending -1, -2 ... if needed.
+ * @param {string} id - Desired id.
+ * @param {HTMLElement|null} [current=null] - Element allowed to keep the id.
+ * @returns {string}
  */
-const state = {
-  // store x/y in pixels (initialized to center of window)
-  x: (window.innerWidth || 0) * 0.5,
-  y: (window.innerHeight || 0) * 0.5,
-  hue: 0,
-  saturation: 100,
-  lightness: 50,
-  opacity: 1,
-  // width/height in pixels (defaults chosen to match typical examples)
-  width: 100,
-  height: 100,
-  roundedness: 0,
-  rotation: 0,
-};
+function uniqueId(id, current = null) {
+  let newId = id;
+  let counter = 1;
+  while (
+    document.getElementById(newId) &&
+    document.getElementById(newId) !== current
+  ) {
+    newId = `${id}-${counter++}`;
+  }
+  return newId;
+}
 
-/* Colour-related functions */
 /**
- * Set the background colour of an element using HSL(A) values and update
- * the internal colour state.
- *
- * @param {number} h - Hue (0..360)
- * @param {number} [s=100] - Saturation in percent (0..100)
- * @param {number} [l=50] - Lightness in percent (0..100)
- * @param {number} [a=1] - Alpha/opacity (0..1)
- * @param {HTMLElement} [element=thing] - Optional element to update. If null,
- *   only the internal state is updated.
- * @returns {void}
+ * A shape: a DOM element plus its own state, with methods to change both.
+ * Setter methods return the shape so calls can be chained.
  */
-export function setColour(h, s = 100, l = 50, a = 1, element = thing) {
-  state.hue = h;
-  state.saturation = s;
-  state.lightness = l;
-  state.opacity = a;
-  if (element != null) {
-    element.style.backgroundColor = `hsl(${h}, ${s}%, ${l}%, ${a})`;
+export class Shape {
+  /** @param {HTMLElement} element - The element this shape controls. */
+  constructor(element) {
+    this.element = element;
+    this.x = (window.innerWidth || 0) * 0.5;
+    this.y = (window.innerHeight || 0) * 0.5;
+    this.hue = 0;
+    this.saturation = 100;
+    this.lightness = 50;
+    this.opacity = 1;
+    this.width = 100;
+    this.height = 100;
+    this.roundedness = 0;
+    this.rotation = 0;
+  }
+
+  /** Set the colour using HSL(A): h 0..360, s and l in percent, a 0..1. */
+  setColour(h, s = 100, l = 50, a = 1) {
+    this.hue = h;
+    this.saturation = s;
+    this.lightness = l;
+    this.opacity = a;
+    this.element.style.backgroundColor = `hsl(${h}, ${s}%, ${l}%, ${a})`;
+    return this;
+  }
+
+  /** Set position using normalized coordinates (0..1 of the window size). */
+  setPosition(x, y) {
+    return this.setPositionPixels(
+      x * (window.innerWidth || 1),
+      y * (window.innerHeight || 1),
+    );
+  }
+
+  /** Set position in pixels from the top-left of the window. */
+  setPositionPixels(px, py) {
+    this.x = px;
+    this.y = py;
+    this.element.style.translate = `${px}px ${py}px`;
+    return this;
+  }
+
+  /**
+   * Set the size: setSize(size) for a square, setSize(width, height) otherwise.
+   */
+  setSize(sizeOrWidth, height = null) {
+    this.width = sizeOrWidth;
+    this.height = height === null ? sizeOrWidth : height;
+    this.element.style.width = `${this.width}px`;
+    this.element.style.height = `${this.height}px`;
+    return this;
+  }
+
+  /** Set the rotation in degrees. */
+  setRotation(rotation) {
+    this.rotation = rotation;
+    this.element.style.rotate = `${rotation}deg`;
+    return this;
+  }
+
+  /** Set the roundedness as a fraction (0..1); 1 is 100% border-radius. */
+  setRoundedness(roundedness) {
+    this.roundedness = roundedness;
+    this.element.style.borderRadius = `${roundedness * 100}%`;
+    return this;
+  }
+
+  /**
+   * Replace all CSS classes on the element. Inline styles set by the other
+   * setters still override class rules.
+   * @param {string} className - One or more space-separated class names.
+   */
+  setClass(className) {
+    this.element.className = className;
+    return this;
+  }
+
+  /**
+   * Set the element id. If the id is taken by another element, a numeric
+   * suffix is appended (e.g. "id-1").
+   * @param {string} id
+   */
+  setID(id) {
+    this.element.id = uniqueId(id, this.element);
+    return this;
   }
 }
 
 /**
- * Set position using normalized coordinates (fractions of the window size).
- * The supplied x and y should be values in the range 0..1 where 0 is the
- * left/top and 1 is the right/bottom of the window. Internally the values
- * are converted to pixels and stored in `state.x`/`state.y`.
+ * Create a new shape: a div appended to the document body, wrapped in a Shape.
  *
- * @param {number} x - Normalized x position (0..1)
- * @param {number} y - Normalized y position (0..1)
- * @param {HTMLElement} [element=thing] - Optional element to update. If
- *   provided, the element's transform will be updated immediately.
- * @returns {void}
- */
-export function setPosition(x, y, element = thing) {
-  // x and y are fractions of the window size (0..1). Convert to pixels
-  const w = window.innerWidth || 1;
-  const h = window.innerHeight || 1;
-
-  state.x = x * w;
-  state.y = y * h;
-
-  if (element != null) {
-    element.style.translate = `${state.x}px ${state.y}px`;
-  }
-}
-
-/**
- * Set position using pixel coordinates.
- *
- * @param {number} px - X position in pixels from the left of the window
- * @param {number} py - Y position in pixels from the top of the window
- * @param {HTMLElement} [element=thing] - Optional element to update.
- * @returns {void}
- */
-export function setPositionPixels(px, py, element = thing) {
-  // With pixel-based state, just store the px/py values directly.
-  state.x = px;
-  state.y = py;
-
-  if (element != null) {
-    element.style.translate = `${state.x}px ${state.y}px`;
-  }
-}
-
-/**
- * Set the size of the element. Call as either:
- *  - setSize(size)                    -> square (width = height = size)
- *  - setSize(width, height)          -> independent width and height
- *
- * If you want to target a specific element you must pass it as the third
- * argument: setSize(size, null, element) or setSize(width, height, element).
- *
- * @param {number} sizeOrWidth - Either the uniform size (px) or the width (px)
- * @param {number|null} [height=null] - Height in px. When omitted (null) height
- *   defaults to the same value as width.
- * @param {HTMLElement} [element=thing] - Optional element to update.
- * @returns {void}
- */
-export function setSize(sizeOrWidth, height = null, element = thing) {
-  const width = sizeOrWidth;
-  const h = height === null ? sizeOrWidth : height;
-
-  // Update state width/height
-  state.width = width;
-  state.height = h;
-
-  const target = element || thing;
-  if (target != null) {
-    target.style.width = `${width}px`;
-    target.style.height = `${h}px`;
-  }
-}
-
-/**
- * Set the rotation (in degrees) for the element and update internal state.
- *
- * @param {number} rotation - Rotation in degrees
- * @param {HTMLElement} [element=thing] - Optional element to update.
- * @returns {void}
- */
-export function setRotation(rotation, element = thing) {
-  state.rotation = rotation;
-  if (element != null) {
-    element.style.rotate = `${rotation}deg`;
-  }
-}
-
-/**
- * Set the roundedness of the element (as a fraction, 0..1) and update
- * internal state. A value of 1 corresponds to 100% border-radius.
- *
- * @param {number} roundedness - Fractional roundedness (0..1)
- * @param {HTMLElement} [element=thing] - Optional element to update.
- * @returns {void}
- */
-export function setRoundedness(roundedness, element = thing) {
-  state.roundedness = roundedness;
-
-  if (element != null) {
-    element.style.borderRadius = `${roundedness * 100}%`;
-  }
-}
-
-/**
- * Create and insert a new "thing" element into the document.
- * - className: the CSS class to give the element (default: 'thing')
- * - id: optional id to set for the element; if the id is already used a numeric
- *       suffix will be appended to keep it unique.
- * Returns the newly created HTMLElement.
- */
-/**
- * Create and insert a new "thing" element into the document.
- *
- * @param {string|null} [id=null] - Optional id to assign to the element. If
- *   the id already exists in the document a numeric suffix will be appended
- *   (e.g. "id-1").
- * @param {string} [className="thing"] - CSS class to apply to the created
- *   element.
- * @returns {HTMLElement} The created element.
+ * @param {string|null} [id=null] - Optional id. If already taken, a numeric
+ *   suffix is appended (e.g. "id-1").
+ * @param {string} [className="shape"] - CSS class to apply to the element.
+ * @returns {Shape} The created shape. Its element is `shape.element`.
  */
 export function createShape(id = null, className = "shape") {
   const el = document.createElement("div");
@@ -168,18 +124,12 @@ export function createShape(id = null, className = "shape") {
   }
 
   if (id) {
-    // Ensure the id is unique in the document; if it's taken append -1, -2 ...
-    let newId = id;
-    let counter = 1;
-    while (document.getElementById(newId)) {
-      newId = `${id}-${counter++}`;
-    }
-    el.id = newId;
+    el.id = uniqueId(id);
   }
 
   // Append to document body so it's visible by default. Styling should come
-  // from the stylesheet (.thing or #thing) rather than inline defaults.
+  // from the stylesheet (.shape or #shape) rather than inline defaults.
   document.body.appendChild(el);
 
-  return el;
+  return new Shape(el);
 }
